@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "pysysair"
+version = "0.1.0"
+description = "Systemair API Bindings for Python"
+authors = ["Robert W <1263192+rbw@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^2.6.1"
+httpx = "^0.26.0"
+
+[tool.poetry.dev-dependencies]
+ariadne-codegen = { extras = ["subscriptions"], version = "^0.12" }
+
+[tool.ariadne-codegen]
+queries_path = "codegen/queries.graphql"
+target_package_path = "pysysair"
+target_package_name = "graphql"
+target_file_path = "codegen/schema.graphql"
+include_comments = "none"
+remote_schema_url = "https://homesolutions.systemair.com/gateway/api"
+remote_schema_headers = {"x-access-token" = "$SYSAIR_INTROSPECTION_TOKEN"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

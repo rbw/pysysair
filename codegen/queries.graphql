@@ -1,0 +1,27 @@
+query GetAllDevices {
+  GetAccountDevices {
+    identifier
+    name
+    street
+    zipcode
+    city
+    country
+    deviceType {
+      entry
+      module
+      scope
+      type
+    }
+    status {
+      connectionStatus
+      serialNumber
+      model
+      startupWizardRequired
+      updateInProgress
+      filterLocked
+      weekScheduleLocked
+      serviceLocked
+      hasAlarms
+    }
+  }
+}

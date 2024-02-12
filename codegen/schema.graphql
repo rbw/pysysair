@@ -1,0 +1,684 @@
+schema {
+  query: RootQueryType
+  mutation: RootMutationType
+}
+
+type RootQueryType {
+  GetLoggedInUser: LoggedInUser!
+  GetAccounts(where: GetAccountsWhereInput!): [Account]!
+  GetCompany(id: Int!): Company
+  GetCompanies(where: GetCompaniesWhereInput): [Company]!
+  GetSubCompanies(companyId: Int!): [Company]!
+  GetAccountCompany: Company
+  GetAccountSubCompanies: [Company!]!
+  WaitForConfirmation(input: WaitForDeviceConfirmationEventInput): WaitForConfirmationEvent
+  GetAccountDevices: [Device]
+  GetMonitoredDevices(input: GetDeviceMonitoringInput): DeviceMonitoringOutputType
+  GetEntityLogs(input: GetEntityLogsInput): [EntityLogOutputType]
+  GetDevicesFilterKits(input: GetDevicesFilterInfoInput): [GetDevicesFilterInfo]
+  BroadcastDeviceStatuses(deviceIds: [String]): Boolean
+  GetNotifications(after: String, first: Int!, where: NotificationsWhere): NotificationsConnection
+  GetServiceAgreementRequestInfo(notificationId: String): ServicePartnerRequestInformationOutput
+  GetRolesAndPermissions: [RolePermissionOutput]
+  GetProjects: [ProjectOutputType]
+  GetExternalDeviceAccesses: [ExternalDeviceAccessOutputType]
+  GetExternalDeviceAccessStatuses(accessIds: [Int]): Boolean
+  VerifyExternalDeviceAccess(deviceIdentifier: String): Boolean
+  GetTranslations(locale: String): [Translation!]!
+  GetLanguages(locale: String): [Language]
+  GetThirdPartyLinks: [ThirdPartyLinkOutputType]
+  GetServicePartners: [ServicePartnerOutput]
+  GetDeviceOwners(input: GetDeviceOwnersInput): [GetDeviceOwnersOutput]
+  ExportExternalDeviceAccessData(deviceId: String): ExportOutput
+  GetExternalDeviceAccessActiveAlarms(deviceId: String): ActiveAlarmsOutput
+  GetWebshopInfo(input: GetWebshopInfoInput): [WebshopInfoOutput]
+}
+
+type LoggedInUser {
+  account: Account
+  translations: [Translation]
+  language: Language
+}
+
+type Account {
+  email: String!
+  firstName: String
+  lastName: String
+  address: Address
+  locale: String
+  phoneNumber: String
+  role: String
+  companyId: Int
+  company: Company
+  permissions: [String]
+  disabled: Boolean!
+  numberOfOwnedDevices: Int!
+  numberOfExternalDeviceAccesses: Int!
+}
+
+type Address {
+  country: String!
+  city: String!
+  street: String!
+  zipCode: String!
+}
+
+type Company {
+  id: Int!
+  name: String
+  m3Number: String
+  mailbox: String
+  parentId: Int
+  phoneNumber: String
+  address: Address
+  salesReference: SalesReference
+  type: COMPANY_TYPE
+  accounts: [Account]!
+  subCompanies: [Company!]!
+  numberOfOwnUnits: Int!
+  numberOfClientUnits: Int!
+  numberOfAccounts: Int!
+  totalNumberOfAccounts: Int!
+}
+
+type SalesReference {
+  name: String!
+  email: String!
+  phoneNumber: String!
+}
+
+enum COMPANY_TYPE {
+  PROFESSIONAL
+  TECHNICAL_SUPPORT
+  UNKNOWN
+}
+
+type Translation {
+  key: String
+  value: String
+  description: String
+}
+
+type Language {
+  name: String
+  english: String
+  native: String
+  flag: String
+}
+
+input GetAccountsWhereInput {
+  role: ROLE
+}
+
+enum ROLE {
+  ROOT
+  ADMIN
+  LOCAL_ADMIN
+  TS_ADMIN
+  PROFESSIONAL
+  LOCAL_TS
+  PROFESSIONAL_SUB_ACCOUNT
+  PRIVATE_USER
+  TRANSLATOR
+}
+
+input GetCompaniesWhereInput {
+  parentId: Int
+  country: String
+  type: String
+}
+
+type WaitForConfirmationEvent {
+  message: String
+  success: Boolean
+}
+
+input WaitForDeviceConfirmationEventInput {
+  deviceId: String
+}
+
+type Device {
+  identifier: String
+  name: String
+  street: String
+  zipcode: String
+  city: String
+  country: String
+  deviceType: DeviceTypeProperties
+  status: DeviceStatus
+}
+
+type DeviceTypeProperties {
+  entry: String
+  module: String
+  scope: String
+  type: String
+}
+
+type DeviceStatus {
+  connectionStatus: String
+  serialNumber: String
+  model: String
+  startupWizardRequired: Boolean
+  updateInProgress: Boolean
+  filterLocked: Boolean
+  weekScheduleLocked: Boolean
+  serviceLocked: Boolean
+  hasAlarms: Boolean
+  units: DeviceStatusUnits
+}
+
+type DeviceStatusUnits {
+  temperature: String
+  pressure: String
+  flow: String
+}
+
+type DeviceMonitoringOutputType {
+  count: Int
+  devices: [DeviceMonitoringDeviceOutputType]
+}
+
+type DeviceMonitoringDeviceOutputType {
+  deviceId: String
+  connection: String
+  connectedAt: String
+  disconnectedAt: String
+  latency: Float
+}
+
+input GetDeviceMonitoringInput {
+  search: String!
+  pageSize: Int!
+  pageNumber: Int!
+  sortingField: String!
+  sortingDirection: String!
+}
+
+type EntityLogOutputType {
+  level: String
+  message: String
+  timestamp: String
+  serviceName: String
+  entityId: String
+}
+
+input GetEntityLogsInput {
+  entityId: String!
+}
+
+type GetDevicesFilterInfo {
+  deviceId: String
+  filterPeriod: Int
+  remainingTime: Int
+  unitModel: String
+  serialNumber: String
+  selectedFilterKit: FilterKitType
+  availableFilterKits: [FilterKitType]
+}
+
+type FilterKitType {
+  id: Int
+  unitItemNumber: String
+  kitItemNumber: String
+  name: String
+  generalDescription: String
+  supplyAirDescription: String
+  extractAirDescription: String
+  price: Float
+  index: Int
+}
+
+input GetDevicesFilterInfoInput {
+  deviceIds: [String]
+}
+
+type NotificationsConnection {
+  totalCount: Int!
+  edges: [NotificationsEdge!]!
+  pageInfo: PageInfo!
+}
+
+type NotificationsEdge {
+  node: Notification!
+  cursor: String!
+}
+
+type Notification {
+  id: String
+  title: String
+  description: String
+  type: NOTIFICATION_TYPE!
+  unread: Boolean
+  email: String
+  properties: NotificationProperties
+  createdAt: String
+}
+
+enum NOTIFICATION_TYPE {
+  SERVICE_PARTNER_REQUEST
+  UNIT_ACCESS_REQUEST
+  PROJECT_ASSIGNMENT
+  SERVICE_PARTNER_REQUEST_REJECTED
+  SERVICE_PARTNER_REQUEST_ACCEPTED
+  UNIT_ACCESS_REQUEST_ACCEPTED
+  UNIT_ACCESS_REQUEST_REJECTED
+}
+
+scalar NotificationProperties
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+input NotificationsWhere {
+  unreadOnly: Boolean
+}
+
+type ServicePartnerRequestInformationOutput {
+  accessPeriod: Int
+  company: Company
+  externalDeviceAccess: ExternalDeviceAccessOutputType
+  requestingRole: String
+}
+
+type ExternalDeviceAccessOutputType {
+  id: Int
+  email: String
+  deviceIdentifier: String
+  name: String
+  accessPeriod: Int
+  state: String
+  owner: Boolean
+  projectId: Int
+  companyId: Int
+  updatedAt: Float
+  deviceType: ExternalDeviceTypeProperties
+}
+
+type ExternalDeviceTypeProperties {
+  entry: String
+  module: String
+  scope: String
+  type: String
+}
+
+type RolePermissionOutput {
+  role: String
+  permissions: [RolePermissionLink]
+}
+
+type RolePermissionLink {
+  type: String
+  description: String
+}
+
+type ProjectOutputType {
+  id: Int
+  name: String
+}
+
+type ThirdPartyLinkOutputType {
+  deviceId: String
+  name: String
+  linkingTypes: [String]
+  applets: [AppletType]
+}
+
+type AppletType {
+  id: String
+  sourceUrl: String
+  slug: String!
+  triggerFields: TriggerFields
+}
+
+scalar TriggerFields
+
+type ServicePartnerOutput {
+  externalDeviceAccess: ExternalDeviceAccessOutputType
+  company: Company
+  deviceName: String
+  role: String
+}
+
+type GetDeviceOwnersOutput {
+  accessId: Int
+  deviceIdentifier: String
+  email: String
+  phoneNumber: String
+  firstName: String
+  lastName: String
+  street: String
+  city: String
+  zipCode: String
+}
+
+input GetDeviceOwnersInput {
+  externalAccessIds: [Int]
+}
+
+type ExportOutput {
+  version: String
+  type: String
+  dataItems: [SerializedDataItemOutputType]
+}
+
+scalar SerializedDataItemOutputType
+
+type ActiveAlarmsOutput {
+  alarms: [ActiveAlarm]
+}
+
+type ActiveAlarm {
+  title: String
+  description: String
+  timestamp: String
+  stopping: Boolean
+  acknowledged: Boolean
+  extension: ActiveAlarmExtension
+}
+
+scalar ActiveAlarmExtension
+
+type WebshopInfoOutput {
+  deviceId: String!
+  filterPeriod: Int
+  remainingTime: Int
+  unitModel: String
+  serialNumber: String
+  availableFilterKits: [FilterKitInfo]
+  webshopResult: WebshopResult
+  shoppingCartURL: String
+}
+
+type FilterKitInfo {
+  isAvailable: Boolean
+  sourceType: String!
+  id: Int
+  unitItemNumber: String
+  kitItemNumber: String
+  index: Int
+  name: String
+  description: String
+  totalPrice: Float
+  currency: String
+  imageURL: String
+  isSelected: Boolean
+  webId: String
+}
+
+type WebshopResult {
+  success: Boolean!
+  message: String!
+}
+
+input GetWebshopInfoInput {
+  deviceIds: [String]
+  email: String!
+}
+
+type RootMutationType {
+  CreateAccount(input: CreateAccountInput!): Account
+  CreateOwnPrivateAccount(input: CreateOwnPrivateAccountInput!): Account!
+  UpdateAccount(input: UpdateAccountInput!): Account
+  UpdateOwnAccount(input: UpdateOwnAccountInput!): Account
+  DeleteAccount(input: DeleteAccountInput!): Boolean!
+  DeleteOwnAccount: Boolean!
+  CreateCompany(input: CreateCompanyInput!): Company!
+  UpdateCompany(input: UpdateCompanyInput!): Company!
+  DeleteCompany(input: DeleteCompanyInput!): Boolean!
+  AssignDeviceToAccount(input: AssignDeviceToAccountInput): AssignDeviceToAccount
+  RemoveDeviceFromAccount(input: RemoveDeviceFromAccountInput): RemoveDeviceFromAccount
+  UpdateDeviceInfo(input: UpdateDeviceInfoInput): Device
+  TechnicalSupportRequest(deviceId: String, comments: String): Boolean
+  OrderFilter(input: OrderFilterInput): Boolean
+  MarkNotificationAsRead(input: MarkNotificationAsReadInput): Boolean!
+  HandleServiceAgreementRequest(input: HandleServicePartnerRequestInput): Boolean
+  HandleAccessRequest(notificationId: String, accessPeriod: Int, accept: Boolean): Boolean
+  CreateProject(name: String!): [ProjectOutputType]
+  UpdateProject(name: String!, id: Int!): [ProjectOutputType]
+  DeleteProject(id: Int): [ProjectOutputType]
+  UpdateRolePermissions(input: UpdateRolePermissionsInput): [RolePermissionOutput]
+  UpdateExternalDeviceAccessCompany(accessId: Int!, companyId: Int): [ExternalDeviceAccessOutputType]
+  UpdateExternalDeviceAccessName(accessId: Int!, name: String!): [ExternalDeviceAccessOutputType]
+  MoveExternalDeviceAccess(accessId: Int!, oldProjectId: Int, newProjectId: Int): [ExternalDeviceAccessOutputType]
+  CreateExternalDeviceAccess(input: CreateExternalDeviceAccessInput): [ExternalDeviceAccessOutputType]
+  UpdateLanguage(name: String, native: String, english: String): [Language]
+  UpdateTranslations(input: UpdateTranslationsInput): [Translation]
+  UpdateThirdPartyLink(deviceId: String, linkingType: String): [ThirdPartyLinkOutputType]
+  TerminateServicePartnerAgreement(accessId: Int!): [ServicePartnerOutput!]!
+  UpdateServicePartnerAgreement(accessId: Int, accessPeriod: Int): [ServicePartnerOutput]
+  RequestExternalDeviceAccess(accessId: Int, accessPeriod: Int): [ExternalDeviceAccessOutputType]
+  DeleteExternalDeviceAccess(accessId: Int): [ExternalDeviceAccessOutputType]
+  ImportExternalDeviceAccessData(input: ImportExternalDeviceDataInput): Boolean
+  DeleteIftttTrigger(id: String): DeleteIftttTrigger
+}
+
+input CreateAccountInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  phoneNumber: String!
+  role: ROLE!
+  address: CreateAddressInput!
+  companyId: Int
+  locale: String
+}
+
+input CreateAddressInput {
+  country: String!
+  city: String!
+  street: String!
+  zipCode: String!
+}
+
+input CreateOwnPrivateAccountInput {
+  phoneNumber: String!
+  address: CreateAddressInput!
+  locale: String
+}
+
+input UpdateAccountInput {
+  email: String!
+  firstName: String
+  lastName: String
+  disabled: Boolean
+  phoneNumber: String
+  locale: String
+  address: UpdateAddressInput
+  companyId: Int
+  role: ROLE
+}
+
+input UpdateAddressInput {
+  country: String
+  city: String
+  street: String
+  zipCode: String
+}
+
+input UpdateOwnAccountInput {
+  city: String
+  country: String
+  locale: String
+  phoneNumber: String
+  street: String
+  zipCode: String
+  firstName: String
+  lastName: String
+  company: AccountCompanyUpdate
+}
+
+input AccountCompanyUpdate {
+  country: String
+  id: Int
+  address: String
+  m3number: String
+  mailbox: String
+  name: String
+  parentId: Int
+  phoneNumber: String
+  salesReferenceEmail: String
+  salesReferenceName: String
+  salesReferencePhoneNumber: String
+  street: String
+  city: String
+  zipCode: String
+}
+
+input DeleteAccountInput {
+  email: String!
+}
+
+input CreateCompanyInput {
+  name: String!
+  phoneNumber: String!
+  mailbox: String!
+  m3Number: String
+  parentId: Int
+  address: CreateAddressInput!
+  salesReference: CreateSalesReferenceInput!
+  type: COMPANY_TYPE!
+}
+
+input CreateSalesReferenceInput {
+  name: String!
+  email: String!
+  phoneNumber: String!
+}
+
+input UpdateCompanyInput {
+  id: Int!
+  name: String
+  phoneNumber: String
+  mailbox: String
+  m3Number: String
+  parentId: Int
+  address: UpdateAddressInput
+  salesReference: UpdateSalesReferenceInput
+  type: COMPANY_TYPE
+}
+
+input UpdateSalesReferenceInput {
+  name: String
+  email: String
+  phoneNumber: String
+}
+
+input DeleteCompanyInput {
+  id: Int!
+}
+
+type AssignDeviceToAccount {
+  success: Boolean
+  message: String
+}
+
+input AssignDeviceToAccountInput {
+  deviceId: String!
+  name: String!
+}
+
+type RemoveDeviceFromAccount {
+  success: Boolean
+  message: String
+}
+
+input RemoveDeviceFromAccountInput {
+  deviceId: String!
+}
+
+input UpdateDeviceInfoInput {
+  identifier: String
+  name: String
+  country: String
+  city: String
+  street: String
+  zipcode: String
+}
+
+input OrderFilterInput {
+  deviceId: String
+  firstName: String
+  lastName: String
+  phoneNumber: String
+  address: String
+  postalCode: String
+  city: String
+  freeText: String
+  country: OrderFilterCountry
+  selectedFilterKits: [OrderFilterKits]
+  subscription: Boolean
+  firstShipmentNow: Boolean
+  shipmentOncePerYear: Boolean
+  saveUserInformation: Boolean
+  firstShipmentDate: String
+}
+
+input OrderFilterCountry {
+  locale: String
+  english: String
+}
+
+input OrderFilterKits {
+  amount: Int
+  kitId: Int
+}
+
+input MarkNotificationAsReadInput {
+  notificationId: String
+  cleanAll: Boolean
+}
+
+input HandleServicePartnerRequestInput {
+  notificationId: String
+  accessPeriod: Int
+  accept: Boolean
+}
+
+input UpdateRolePermissionsInput {
+  role: String
+  permissions: [String]
+}
+
+input CreateExternalDeviceAccessInput {
+  deviceIdentifier: String!
+  name: String!
+  ownUnit: Boolean!
+  projectId: Int
+  accessPeriod: Int
+  companyId: Int
+}
+
+input UpdateTranslationsInput {
+  locale: String
+  updates: [TranslationUpdateType]
+}
+
+input TranslationUpdateType {
+  key: String
+  value: String
+  description: String
+}
+
+input ImportExternalDeviceDataInput {
+  deviceIds: [String]
+  configuration: GraphqlProxyImportInput
+}
+
+input GraphqlProxyImportInput {
+  version: String
+  type: String
+  registers: [DataItemImportInput]
+}
+
+input DataItemImportInput {
+  id: Int
+  value: Int
+}
+
+type DeleteIftttTrigger {
+  success: Boolean
+  message: String
+}

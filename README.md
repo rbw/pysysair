@@ -18,7 +18,7 @@ The Systemair GraphQL API utilizes OIDC. Despite its advantages, it lacks user-f
 
 #### Usage
 
-To integrate `pysysair` into your project, ensure you are registered at https://homesolutions.systemair.com with your ventilation systems linked to your account. Additionally, update your password to enable OAuth2 password grant functionality at https://sso.systemair.com/auth/realms/iot/login-actions/authenticate?client_id=account-console.
+To integrate `pysysair` into your project, ensure you are registered at https://homesolutions.systemair.com with your ventilation systems linked to your account. Also, your must update your password at https://sso.systemair.com/auth/realms/iot/login-actions/authenticate?client_id=account-console to enable OAuth2 password grant functionality.
 
 See [Examples](/examples) to get started.
 
@@ -26,3 +26,7 @@ See [Examples](/examples) to get started.
 #### Status
 
 WIP: Currently in early development, this project is not yet complete with all intended features.
+
+#### Author
+
+Robert W <1263192+rbw@users.noreply.github.com>

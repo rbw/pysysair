@@ -16,6 +16,10 @@ Built atop asyncio, the Python GraphQL Client leverages ariadne-codegen for sche
 The Systemair GraphQL API utilizes OIDC. Despite its advantages, it lacks user-friendly options for managing integrations, which restricts the OAuth2 Flows available. Nonetheless, it supports the password grant option, allowing users to exchange email-password credentials for tokens to interact with their GraphQL service.
 
 
+#### Installing
+
+$ pip install pysysair
+
 #### Usage
 
 To integrate `pysysair` into your project, ensure you are registered at https://homesolutions.systemair.com with your ventilation systems linked to your account. Also, your must update your password at https://sso.systemair.com/auth/realms/iot/login-actions/authenticate?client_id=account-console to enable OAuth2 password grant functionality.
